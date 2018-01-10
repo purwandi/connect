@@ -10,7 +10,7 @@ class GroupControllerTest extends AbstractControllerTest
     public function test_create_group()
     {
         $groups = Mockery::mock(GroupRepository::class);
-        $groups->shouldReceive('store')->andReturn(
+        $groups->shouldReceive('create')->andReturn(
             (object)[
                 'id' => 1,
                 'name' => 'Project name',
@@ -40,7 +40,7 @@ class GroupControllerTest extends AbstractControllerTest
     public function test_invalid_post_data()
     {
         $groups = Mockery::mock(GroupRepository::class);
-        $groups->shouldReceive('store')->andReturn([]);
+        $groups->shouldReceive('create')->andReturn([]);
 
         $this->app->instance(GroupRepository::class, $groups);
         

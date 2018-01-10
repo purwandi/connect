@@ -1,12 +1,14 @@
 <?php
 
-
 namespace Tests\Unit\Repositories;
 
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class IssueRepositoryTest extends TestCase
 {
+    use RefreshDatabase;
+    
     public function test_create_issue()
     {
         $user = factory(\App\User::class)->create();

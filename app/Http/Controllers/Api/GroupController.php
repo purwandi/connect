@@ -38,7 +38,7 @@ class GroupController extends Controller
             'name' => 'required|unique:groups',
         ]);
 
-        $group = $this->groups->store(
+        $group = $this->groups->create(
             $request->user(), 
             $request->input('name'), 
             $request->input('description')

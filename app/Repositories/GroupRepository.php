@@ -15,7 +15,7 @@ class GroupRepository
      * @param string $description
      * @return App\Group
      */
-    public function store(User $user, string $name, string $description) 
+    public function create(User $user, string $name, string $description) 
     {
         return DB::transaction(function() use($user, $name, $description) {
             $group = Group::create([
