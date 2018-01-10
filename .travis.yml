@@ -1,0 +1,48 @@
+language: php
+php:
+  - '7.0'
+  - '7.1'
+  - '7.2'
+
+env:
+  global:
+    - setup=stable
+
+matrix:
+  include:
+    - php: 7.0
+      env: setup=lowest
+    - php: 7.1
+      env: setup=lowest
+    - php: 7.2
+      env: setup=lowest
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+services:
+  - mysql
+
+before_install:
+  - phpenv config-rm xdebug.ini || true
+  - echo "extension = memcached.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - printf "\n" | pecl install -f redis
+  - travis_retry composer self-update
+
+install:
+  - if [[ $setup = 'stable' ]]; then travis_retry composer update --prefer-dist --no-interaction --prefer-stable --no-suggest; fi
+  - if [[ $setup = 'lowest' ]]; then travis_retry composer update --prefer-dist --no-interaction --prefer-lowest --prefer-stable --no-suggest; fi
+
+before_script:
+  - mysql -u root -e 'create database homestead_testing;'
+  - cp .env.example .env
+  - php artisan key:generate
+
+script: 
+  - vendor/bin/phpunit
+
+matrix:
+  fast_finish: true

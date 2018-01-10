@@ -1,0 +1,15 @@
+/node_modules
+/public/hot
+/public/mix-manifest.json
+/public/storage
+/public/service-worker.js
+/storage/*.key
+/vendor
+/.idea
+/.vagrant
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+.vscode
+.env
