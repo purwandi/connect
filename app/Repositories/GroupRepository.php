@@ -17,6 +17,10 @@ class GroupRepository
      */
     public function create(User $user, string $name, string $description) 
     {
+        if ($user->group()->where('slug', str_slug($name))->first()) {
+            return null;
+        }
+
         return DB::transaction(function() use($user, $name, $description) {
             $group = Group::create([
                 'name' => $name,
