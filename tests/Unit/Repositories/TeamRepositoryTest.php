@@ -15,6 +15,11 @@ class TeamRepositoryTest extends TestCase
         $group = (new \App\Repositories\GroupRepository)->create($user, 'Example group', 'About example group');
         $team = (new \App\Repositories\TeamRepository)->create($group, $user, 'Developer');
 
+        $this->assertDatabaseHas('teams', [
+            'name' => 'Developer',
+            'group_id' => $group->id
+        ]);
+
         $this->assertDatabaseHas('users_teams', [
             'team_id' => $team->id,
             'user_id' => $user->id
@@ -23,6 +28,14 @@ class TeamRepositoryTest extends TestCase
         $this->assertDatabaseHas('users_teams', [
             'team_id' => $team->id,
             'user_id' => $user->id
+        ]);
+
+        $this->assertEquals([
+            'group_id' => $group->id,
+            'name' => $team->name
+        ], [
+            'group_id' => $group->id,
+            'name' => 'Developer'
         ]);
     }
 
@@ -35,5 +48,31 @@ class TeamRepositoryTest extends TestCase
         $user2 = factory(\App\User::class)->create();
         $group = (new \App\Repositories\GroupRepository)->create($user, 'Example group', 'About example group');
         $team = (new \App\Repositories\TeamRepository)->create($group, $user2, 'Developer');
+    }
+
+    public function test_get_all_team_by_given_group()
+    {
+        $user = factory(\App\User::class)->create();
+        $group = (new \App\Repositories\GroupRepository)->create($user, 'Example group', 'About example group');
+        $team = (new \App\Repositories\TeamRepository)->create($group, $user, 'Developer');
+
+        $teams = (new \App\Repositories\TeamRepository)->getAllTeamByGivenGroup($group, $user);
+
+        $this->assertEquals([['name' => 'Developer']], [['name' => $team->name]]);
+    }
+
+    /**
+     * @expectedException \App\Exceptions\InvalidErrorPermissionException
+     */
+    public function test_failed_to_get_all_team_because_user_is_not_in_group()
+    {
+        $user = factory(\App\User::class)->create();
+        $user2 = factory(\App\User::class)->create();
+        $group = (new \App\Repositories\GroupRepository)->create($user, 'Example group', 'About example group');
+        $team = (new \App\Repositories\TeamRepository)->create($group, $user, 'Developer');
+
+        $teams = (new \App\Repositories\TeamRepository)->getAllTeamByGivenGroup($group, $user2);
+
+        $this->assertEquals($teams, []);
     }
 }

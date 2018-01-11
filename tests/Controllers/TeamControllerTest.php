@@ -8,6 +8,80 @@ use Mockery;
 
 class TeamControllerTest extends AbstractControllerTest 
 {
+    public function test_get_all_team_by_given_group()
+    {
+        $groups = Mockery::mock(GroupRepository::class);
+        $groups->shouldReceive('findById')->andReturn(
+            \App\Group::make([ 'id' => 1, 'name' => 'Project', 'slug' => 'project', 'description' => 'Awesome project'])
+        );
+
+        $team1 = \App\Team::make(['name' => 'Developer']);
+        $team1->id = 1;
+        $team1->group_id = 1;
+        $team2 = \App\Team::make(['name' => 'Kreatif']);
+        $team2->id = 2;
+        $team2->group_id = 1;
+
+        $teams = Mockery::mock(TeamRepository::class);
+        $teams->shouldReceive('getAllTeamByGivenGroup')->andReturn(collect([$team1, $team2]));
+
+        $this->app->instance(GroupRepository::class, $groups);
+        $this->app->instance(TeamRepository::class, $teams);
+
+        $response = $this->actingAs(factory(\App\User::class)->make(), 'api')
+            ->json('GET', '/api/groups/1/teams');
+        
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    ['id' => 1, 'name' => 'Developer', 'group_id' => 1],
+                    ['id' => 2, 'name' => 'Kreatif', 'group_id' => 1],
+                ]
+            ]);
+    }
+
+    public function test_get_all_empty_teams_by_given_group()
+    {
+        $groups = Mockery::mock(GroupRepository::class);
+        $groups->shouldReceive('findById')->andReturn(
+            \App\Group::make([ 'id' => 1, 'name' => 'Project', 'slug' => 'project', 'description' => 'Awesome project'])
+        );
+
+        $teams = Mockery::mock(TeamRepository::class);
+        $teams->shouldReceive('getAllTeamByGivenGroup')->andReturn(collect([]));
+
+        $this->app->instance(GroupRepository::class, $groups);
+        $this->app->instance(TeamRepository::class, $teams);
+
+        $response = $this->actingAs(factory(\App\User::class)->make(), 'api')
+            ->json('GET', '/api/groups/1/teams');
+        
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => []
+            ]);
+    }
+
+
+    public function test_get_all_empty_teams_by_wrong_group()
+    {
+        $groups = Mockery::mock(GroupRepository::class);
+        $groups->shouldReceive('findById')->andReturn(
+            \App\Group::make([ 'id' => 1, 'name' => 'Project', 'slug' => 'project', 'description' => 'Awesome project'])
+        );
+
+        $teams = Mockery::mock(TeamRepository::class);
+        $teams->shouldReceive('getAllTeamByGivenGroup')->andThrow(\App\Exceptions\InvalidErrorPermissionException::class);
+
+        $this->app->instance(GroupRepository::class, $groups);
+        $this->app->instance(TeamRepository::class, $teams);
+
+        $response = $this->actingAs(factory(\App\User::class)->make(), 'api')
+            ->json('GET', '/api/groups/1/teams');
+        
+        $response->assertStatus(400);
+    }
+
     public function test_create_team()
     {
         $groups = Mockery::mock(GroupRepository::class);
@@ -17,7 +91,7 @@ class TeamControllerTest extends AbstractControllerTest
 
         $teams = Mockery::mock(TeamRepository::class);
         $teams->shouldReceive('create')
-            ->andReturn((object) [ 'id' => 1,  'name' => 'Developer' ]);
+            ->andReturn((object) [ 'id' => 1,  'name' => 'Developer', 'group_id' => 1 ]);
         
         $group = Mockery::mock(\App\Contracts\GroupContract::class);
         
@@ -26,8 +100,6 @@ class TeamControllerTest extends AbstractControllerTest
 
         $this->app->instance(GroupRepository::class, $groups);
         $this->app->instance(TeamRepository::class, $teams);
-        $this->app->instance(\App\Contracts\GroupContract::class, $group);
-        $this->app->instance(\App\Contracts\UserContract::class, $user);
 
         $response = $this->actingAs(factory(\App\User::class)->make(), 'api')
             ->json('POST', '/api/groups/1/teams', [

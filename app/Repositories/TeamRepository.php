@@ -10,6 +10,23 @@ use Illuminate\Support\Facades\DB;
 
 class TeamRepository
 {
+
+    /**
+     * Get all team by given group id
+     *
+     * @param Group $group
+     * @param User $user
+     * @return void
+     */
+    public function getAllTeamByGivenGroup(Group $group, User $user)
+    {
+        if ($user->isUserInGroup($group) === false) {
+            throw new InvalidErrorPermissionException;
+        }
+
+        return $group->team()->get();
+    }
+
     /**
      * Create team by given group
      *

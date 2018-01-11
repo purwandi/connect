@@ -16,7 +16,8 @@ class TeamResource extends Resource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name
+            'name' => $this->name,
+            'group_id' => $this->group_id
         ];
     }
 }

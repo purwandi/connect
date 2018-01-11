@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\InvalidErrorPermissionException;
 use App\Http\Controllers\Controller;
 use App\Repositories\GroupRepository;
 use App\Repositories\TeamRepository;
 use App\Http\Resources\TeamResource;
+use App\Http\Resources\TeamResourceCollection;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -38,9 +40,29 @@ class TeamController extends Controller
         $this->teams = $teams;
     }
 
+    /**
+     * Get teams by given team
+     *
+     * @param Request $request
+     * @param integer $groupId
+     * @return void
+     */
     public function index(Request $request, int $groupId)
     {
+        $user = $request->user();
+        $group = $this->groups->findById($groupId);
 
+        try {
+            $teams = $this->teams->getAllTeamByGivenGroup($group, $user);
+
+            if (count($teams) > 0) {
+                return new TeamResourceCollection($teams);
+            }
+            
+            return response()->json(['data' => []]);
+        } catch (InvalidErrorPermissionException $error) {
+            throw new BadRequestHttpException('Dont have permission to see on this endpoint.');
+        }
     }
 
     /**

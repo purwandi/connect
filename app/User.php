@@ -55,6 +55,12 @@ class User extends Authenticatable
         return $this->group()->where('group_id', $group->id)->first() !== null;
     }
 
+    /**
+     * Check if the current is user is member of team in project
+     *
+     * @param Project $project
+     * @return boolean
+     */
     public function isUserInProject(Project $project)
     {
         return $this->project()->where('project_id', $project->id)->first() !== null;
