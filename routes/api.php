@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 
 Route::group(['middleware' => ['auth:api']], function() {
     Route::post('groups', 'Api\\GroupController@store');
+
+    Route::resource('groups/{id}/teams', 'Api\\TeamController')->except(['create', 'edit']);
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
