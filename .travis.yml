@@ -42,6 +42,7 @@ before_script:
   - php artisan key:generate
 
 script: 
+  - touch storage/logs/laravel.log
   - vendor/bin/phpunit
   - cat storage/logs/laravel.log
 
