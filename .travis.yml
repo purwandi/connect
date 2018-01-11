@@ -43,6 +43,7 @@ before_script:
 
 script: 
   - vendor/bin/phpunit
+  - cat storage/log/laravel.log
 
 matrix:
   fast_finish: true
